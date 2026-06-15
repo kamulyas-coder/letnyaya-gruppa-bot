@@ -4,6 +4,7 @@
 """
 
 import os
+import json
 import gspread
 from google.oauth2.service_account import Credentials
 
@@ -19,7 +20,16 @@ SKIP_SHEETS = {"Инструкция", "Карта ресурсов", "Прим�
 
 
 def get_client():
-    creds = Credentials.from_service_account_file("service_account.json", scopes=SCOPES)
+    """Создаёт клиент Google Sheets.
+    Сначала пробует переменную окружения GOOGLE_SERVICE_ACCOUNT_JSON,
+    затем файл service_account.json.
+    """
+    sa_json = os.getenv("GOOGLE_SERVICE_ACCOUNT_JSON")
+    if sa_json:
+        info = json.loads(sa_json)
+        creds = Credentials.from_service_account_info(info, scopes=SCOPES)
+    else:
+        creds = Credentials.from_service_account_file("service_account.json", scopes=SCOPES)
     return gspread.authorize(creds)
 
 
